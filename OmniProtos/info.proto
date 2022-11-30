@@ -1,0 +1,51 @@
+syntax = "proto3";
+package openmind;
+
+option csharp_namespace = "OpenMind";
+
+service InfoService {
+  /**
+   * List the version number for the Summit Server
+   */
+  rpc VersionNumber (VersionNumberRequest) returns (VersionNumberResponse); 
+  /**
+  * List supported devices.
+  */
+  rpc SupportedDevices (SupportedDevicesRequest) returns (SupportedDevicesResponse);
+  /**
+   * Inspect Repository.
+   */
+  rpc InspectRepository (InspectRepositoryRequest) returns (InspectRepositoryResponse);
+}
+
+message VersionNumberRequest {}
+
+message VersionNumberResponse {
+  
+  /**
+   String with the version number for the Summit Server 
+   */
+  string version_number = 1;
+}
+
+message SupportedDevicesRequest {}
+
+message SupportedDevicesResponse {
+  /**
+   * List with supported devices.
+   */
+  repeated string supported_devices = 1;
+
+}
+
+message InspectRepositoryRequest{
+}
+
+message InspectRepositoryResponse{
+
+  /**
+   * List of URI's in repository
+   */
+  repeated string repo_uri = 1;
+
+}

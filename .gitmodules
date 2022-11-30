@@ -1,0 +1,3 @@
+[submodule "OpenMindProtos"]
+	path = OmniProtos
+	url = https://github.com/openmind-consortium/OmniProtos.git

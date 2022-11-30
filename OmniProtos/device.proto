@@ -1,0 +1,877 @@
+syntax = "proto3";
+package openmind;
+
+option csharp_namespace = "OpenMind";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "summit.proto";
+
+service DeviceManagerService {
+  /**
+   * List devices.
+   */
+  rpc ListDevices (ListDeviceRequest) returns (ListDeviceResponse);
+
+  /**
+   * Connect to device.
+   */
+  rpc ConnectDevice (ConnectDeviceRequest) returns (ConnectDeviceResponse);
+
+  /**
+   * Disconnect from a device.
+   * NOTE (Summit): This will disconnect the bridge also.
+   */
+  rpc DisconnectDevice (DisconnectDeviceRequest) returns (google.protobuf.Empty);
+
+  /**
+   * Configure Sense
+   */
+  rpc SenseConfiguration (SenseConfigurationRequest) returns (SenseConfigurationResponse);
+  
+  /**
+   * Enable Stream
+   */
+  rpc StreamEnable (StreamConfigureRequest) returns (StreamConfigureResponse);
+
+  /**
+   * Disable Stream
+   */
+  rpc StreamDisable (StreamConfigureRequest) returns (StreamConfigureResponse);
+
+  /**
+   * Can be used to initiate or end a stream of sensed time domain data events
+   */
+  rpc TimeDomainStream(SetDataStreamEnable) returns (stream TimeDomainUpdate);
+
+  /**
+   * Can be used to initiate or end a stream of calculated fourier transform data events
+   */
+  rpc FourierTransformStream(SetDataStreamEnable) returns (stream FourierTransformUpdate);
+
+  /**
+   * Can be used to initiate or end a stream of summed band power data events
+   */
+  rpc BandPowerStream(SetDataStreamEnable) returns (stream BandPowerUpdate);
+
+  /**
+   * Can be used to initiate or end a stream of sensed accelerometer data events
+   */
+  rpc InertialStream(SetDataStreamEnable) returns (stream InertialUpdate);
+
+  /**
+   * Can be used to initiate or end a stream of conneciton status events
+   */
+  rpc AdaptiveStream(SetDataStreamEnable) returns (stream AdaptiveUpdate);
+
+  /**
+   * Can be used to initiate or end a stream of loop record update events
+   */
+  rpc LoopRecordUpdateStream(SetDataStreamEnable) returns (stream LoopRecordUpdate);
+
+  /**
+   * Can be used to initiate or end a stream of echo events
+   */
+  rpc EchoStream(SetDataStreamEnable) returns (stream EchoUpdate);
+
+  /**
+   * Device Status
+   */
+  rpc DeviceStatus (DeviceStatusRequest) returns (DeviceStatusResponse);
+  
+  /**
+   * Lead Integrity Test
+   */
+  rpc LeadIntegrityTest (ImpedanceRequest) returns (ImpedanceResponse);
+}
+
+message Device {
+  /**
+   * Scheme-less URI describing the device resource.
+   * For example, '//summit/bridge/xxxxxxxxx/device/yyyyyyyyy' where
+   * 'xxxxxxxxx' is the serial number of the bridge and 'yyyyyyyyy' is
+   * the serial number of the device.
+   */
+  string name = 1;
+}
+
+message ListDeviceRequest {
+  /**
+   * The partial scheme-less URI for the resource. For example,
+   * '//summit/bridge/xxxxxxxxxx/device/123' will search for all
+   * devices whose serial number begins with 123.
+   */
+  string query = 1;
+}
+
+message ListDeviceResponse {
+  /**
+   * List of devices.
+   */
+  repeated Device devices = 1;
+
+  /**
+   * Additional platform specific error details. These are defined in a separate
+   * protobuf files, one per manufacturer.
+   */
+  SummitError error = 2;
+}
+
+message ConnectDeviceRequest {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+}
+
+message ConnectDeviceResponse {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * Additional platform specific details. These are defined in a separate
+   * protobuf files, one per device manufacturer.
+   */
+  uint32 connection_status = 2;
+
+  /**
+   * Additional platform specific error details. These are defined in a separate
+   * protobuf files, one per manufacturer.
+   */
+  SummitError error = 3;
+}
+
+message DisconnectDeviceRequest {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+}
+
+enum SenseConfigureStatus {
+  SENSE_CONFIGURE_STATUS_UNKNOWN = 0;
+  SENSE_CONFIGURE_STATUS_SUCCESS = 1;
+  SENSE_CONFIGURE_STATUS_FAILURE = 2;
+}
+
+message SenseConfigurationRequest{
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+   /**
+	 Time Domain sample rate
+   */
+   uint32 timedomain_sampling_rate = 2;
+
+   /**
+	 Time Channel Configuration
+   */
+	repeated SummitTimeDomainChannelConfig td_channel_configs = 3;
+
+   /**
+	 FFT
+   */
+   SummitFastFourierTransformStreamConfiguration fft_config = 4;
+
+  /**
+   * Power channel configuration.
+   */
+	SummitPowerStreamConfiguration power_channel_config = 5;
+
+  /**
+	 Misc
+   */
+	MiscellaneousStreamConfiguration misc_stream_config = 6;
+
+
+  /**
+	 Accelerometer
+   */
+	SummitAccelerometerStreamConfiguration accelerometer_config = 7;
+
+  /**
+    Enable Sense
+   */
+   SummitSenseEnablesConfiguration sense_enables_config = 8;
+}
+
+message SenseConfigurationResponse{
+/**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * Additional platform specific error details. These are defined in a separate
+   * protobuf files, one per manufacturer.
+   */
+  SummitError error = 2;
+}
+
+enum StreamConfigureStatus {
+  STREAM_CONFIGURE_STATUS_UNKNOWN = 0;
+  STREAM_CONFIGURE_STATUS_SUCCESS = 1;
+  STREAM_CONFIGURE_STATUS_FAILURE = 2;
+}
+
+message StreamConfigureRequest{
+/**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * Additional platform specific arguments. These are defined in separate
+   * protobuf files, one per device manufacturer.
+   */
+  SummitStreamEnablesConfiguration parameters = 2;
+}
+
+message StreamConfigureResponse{
+/**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+  
+  /**
+   * Status of the configuration attempt.
+   */
+  StreamConfigureStatus stream_configure_status = 2;
+
+  /**
+   * Additional platform specific error details. These are defined in a separate
+   * protobuf files, one per manufacturer.
+   */
+  SummitError error = 3;
+}
+
+message SetDataStreamEnable {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;
+  /**
+   * Boolean flag indicating if stream should be
+   * started or stopped.
+   */
+  bool enable_stream = 2;
+}
+
+message DataPacketHeader {
+  /**
+   * 
+   */
+  uint32 global_sequence_number = 1;
+
+  /**
+   * 
+   */
+  uint32 data_type_sequence_number = 2;
+
+  /**
+   * 
+   */
+  uint32 ins_timestamp = 3;
+
+  /**
+   * 
+   */
+  uint32 ins_tick = 4;
+
+  /**
+   * 
+   */
+  int64 system_rx_time = 5;
+
+  /**
+   * 
+   */
+  int64 system_est_device_tx_time = 6;
+}
+
+message TimeDomainUpdate {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+  
+  /**
+   * MOVE TO DETAILS
+   */
+  DataPacketHeader header = 2;
+
+  /**
+   * 
+   */
+  repeated TimeDomainChannelData data = 3;
+}
+
+message TimeDomainChannelData {
+  /**
+   * 
+   */
+  string channel_id = 1;
+
+  /**
+   * 
+   */
+   string units = 2;
+
+  /**
+   * 
+   */
+  double sampling_rate = 3;
+
+  /**
+   * 
+   */
+  repeated double channel_data = 4;
+
+  /**
+   * currently summit-specific but may be a good idea to represent at a generic level 
+   */
+   // move to "details"
+  repeated TimeDomainChannelStimTiming stimulation_pulse_indeces = 5;
+}
+
+message TimeDomainChannelStimTiming {
+  /**
+   * 
+   */
+  int32 data_index = 1;
+
+  /**
+   * 
+   */
+  int32 time_before_in_microseconds = 2;
+}
+
+message FourierTransformUpdate {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+  
+  /**
+   * 
+   */
+  DataPacketHeader header = 2;
+
+  /**
+   * 
+   */
+  repeated FourierTransformChannelData data = 3;
+}
+
+message FourierTransformChannelData {
+  /**
+   * 
+   */
+  string channel_id = 1;
+
+  /**
+   * 
+   */
+   string units = 2;
+  
+  /**
+   * 
+   */
+  double sampling_rate = 3;
+
+  /**
+   * 
+   */
+  uint32 fourier_length = 4;
+
+  /**
+   * 
+   */
+  repeated double channel_data = 5;
+}
+
+message BandPowerUpdate {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * 
+   */
+  DataPacketHeader header = 2;
+
+  /**
+   * 
+   */
+  repeated BandPowerChannelData data = 3;
+}
+
+message ConfigureMiscellaneousStreamRequest {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * Additional platform specific arguments. These are defined in separate
+   * protobuf files, one per device manufacturer.
+   */
+  //google.protobuf.Any MiscellaneousStreamConfiguration = 2;
+}
+
+message BandPowerChannelData {
+  /**
+   * 
+   */
+  string channel_id = 1;
+
+  /**
+   * 
+   */
+   string units = 2;
+  
+  /**
+   * 
+   */
+  double sampling_rate = 3;
+
+  /**
+   * 
+   */
+  uint32 fourier_length = 4;
+
+  /**
+   * 
+   */
+  uint32 channel_data = 5;
+}
+
+message InertialUpdate {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * 
+   */
+  DataPacketHeader header = 2;
+
+  /**
+   * 
+   */
+  repeated InertialChannelData data = 3;
+}
+
+message InertialChannelData {
+  /**
+   * 
+   */
+  string channel_id = 1;
+
+  /**
+   * 
+   */
+   string units = 2;
+  
+  /**
+   * 
+   */
+  double sampling_rate = 3;
+
+  /**
+   * 
+   */
+   imu_axis channel_axis = 4;
+
+  /**
+   * 
+   */
+   repeated double channel_data = 5;
+}
+
+enum imu_axis {
+	x = 0;
+	y = 1;
+	z = 2;
+}
+
+// POTENTIALLY RENAME TO CLASSIFIER UPDATE
+message AdaptiveUpdate {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * 
+   */
+  DataPacketHeader header = 2;
+
+  /**
+   * 
+   */
+  uint32 current_state = 3;
+  
+  /**
+   * 
+   */
+  uint32 current_state_count = 4;
+
+  /**
+   * 
+   */
+  uint32 current_state_total_time = 5;
+
+  /**
+   * 
+   */
+  uint32 previous_state = 6;
+
+  /**
+   * 
+   */
+  repeated double current_amplitudes = 7;
+
+  /**
+   * 
+   */
+  double current_frequency = 8;
+  
+  /**
+   * 
+   */
+  bool in_holdoff = 9;
+
+  /**
+   * 
+   */
+  repeated DetectorState detector_state = 10;
+
+  /**
+   * 
+   */
+   repeated DetectorStatus detector_status = 11;
+
+  /**
+   * 
+   */
+   repeated SensingEnables sensors_enabled = 12;
+
+  /**
+   * 
+   */
+   repeated AdaptiveRampingFlags adaptive_stim_ramping = 13;
+}
+
+enum DetectorState {
+  NoState = 0;
+  lowImmediateDetect = 1;
+  highImmediateDetect = 2;
+  lowDetect = 4;
+  highDetect = 8;
+  outputOverRange = 16;
+  blanked = 32;
+  inputOverRange = 64;
+  inHoldOff = 128;
+}
+
+message DetectorStatus {
+  /**
+   * 
+   */
+  repeated uint32 feature_inputs = 1;
+
+  /**
+   * 
+   */
+  uint32 output = 2;
+
+  /**
+   * 
+   */
+  uint32 low_threshold = 3;
+
+  /**
+   * 
+   */
+  uint32 high_threshold = 4;
+
+  /**
+   * 
+   */
+  uint32 fixed_decimal_setpoint = 5;
+}
+
+enum SensingEnables {
+  SensingNone = 0;
+  LfpTimeDomain = 1;
+  Fourier = 2;
+  PowerBand = 4;
+  LD0 = 16;
+  LD1 = 32;
+  LoopRecord = 64;
+  Adaptive = 128;
+}
+
+enum AdaptiveRampingFlags {
+  RampingNone = 0;
+  Prog0AmpRamping = 1;
+  Prog1AmpRamping = 2;
+  Prog2AmpRamping = 4;
+  Prog3AmpRamping = 8;
+}
+
+message LoopRecordUpdate {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * 
+   */
+  DataPacketHeader header = 2;
+
+  /**
+   * 
+   */
+   repeated LoopRecordTriggers triggers = 3;
+
+  /**
+   * 
+   */
+   repeated LoopRecordFlags flags = 4;
+}
+
+enum LoopRecordTriggers {
+  NoTrigger = 0;
+  state0 = 1;
+  state1 = 2;
+  state2 = 4;
+  state3 = 8;
+  state4 = 16;
+  state5 = 32;
+  state6 = 64;
+  state7 = 128;
+  state8 = 256;
+}
+
+enum LoopRecordFlags {
+  NoFlags = 0;
+  wrap = 1;
+  triggered = 2;
+  completed = 4;
+  stopped = 8;
+  enable = 128;
+}
+
+message EchoUpdate {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * 
+   */
+  DataPacketHeader header = 2;
+
+  /**
+   * 
+   */
+  uint32 echo_byte = 3;
+}
+
+message DeviceStatusRequest {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+}
+
+message DeviceStatusResponse {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+  
+  /**
+   * battery level percent
+   */
+  google.protobuf.UInt32Value battery_level_percent = 2;
+  
+  /**
+   * battery voltage measurement (mV)
+   */
+  google.protobuf.UInt32Value battery_level_voltage = 3;
+  
+  /**
+   * battery state of charge (mAh)
+   */
+  google.protobuf.UInt32Value battery_soc = 4;
+  
+  /**
+   * state of charge uncertainty (mAh)
+   */
+  google.protobuf.UInt32Value soc_uncertainty = 5;
+  
+  /**
+   * manufactured battery capacity (mAh).
+   */
+  google.protobuf.UInt32Value manufactured_capacity = 6;
+  
+  /**
+   * estimated battery capacity (mAh).
+   */
+  google.protobuf.UInt32Value estimated_capacity = 7;
+  
+  /**
+   * therapy unavailable state of charge value (mAh)
+   */
+  google.protobuf.UInt32Value therapy_unavailable_soc = 8;
+  
+  /**
+   * battery full state of change value (mAh)
+   */
+  google.protobuf.UInt32Value full_soc = 9;
+
+  /**
+   * Additional platform specific error details. These are defined in a separate
+   * protobuf files, one per manufacturer.
+   */
+  SummitError error = 10;
+}
+
+message ImpedanceResponse {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * impedence values 
+   */
+  repeated double impedance_values = 2;
+
+  /**
+   * Error string
+   */
+  string error_description = 3;
+
+  /**
+   * Type of error description
+   */
+  ImpedanceErrorCode impedance_error_code = 4;
+
+  /**
+   * Additional platform specific error details. These are defined in a separate
+   * protobuf files, one per manufacturer.
+   */
+  SummitError error = 5;
+}
+
+enum ImpedanceErrorCode {
+  /**
+   * Default case. No error case
+   */
+  NO_IMPEDANCE_ERROR = 0;
+
+  /**
+   * When Lead pair values are out of range
+   */
+  OUT_OF_RANGE_LEAD_PAIR_VALUES = 1;
+
+  /**
+   * When we get null array from the api
+   */
+  NULL_IMPEDANCE = 2;
+}
+
+message ImpedanceRequest {
+  /**
+   * Scheme-less URI describing the device resource. For example,
+   * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+   * serial number of the bridge and 'yyyyyy' is the serial number
+   * of the device.
+   */
+  string name = 1;
+
+  /**
+   * lead points 
+   */
+  repeated LeadList lead_list = 2;
+}
+
+message LeadList{
+  /**
+   * lead 1
+   */
+  int32 lead1 = 1;  
+
+  /**
+   * lead 1
+   */
+  int32 lead2 = 2;
+}

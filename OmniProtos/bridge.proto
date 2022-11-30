@@ -1,0 +1,279 @@
+syntax = "proto3";
+package openmind;
+
+option csharp_namespace = "OpenMind";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "summit.proto";
+
+service BridgeManagerService {
+  /**
+   * List already known bridges.
+   */
+  rpc ListBridges(QueryBridgesRequest) returns (QueryBridgesResponse);
+
+  /**
+   * List already connected bridges.
+   */
+  rpc ConnectedBridges(QueryBridgesRequest) returns (QueryBridgesResponse);
+
+  /**
+   * Connect to a given bridge.
+   */
+  rpc ConnectBridge(ConnectBridgeRequest) returns (ConnectBridgeResponse);
+
+  /**
+   * Dumps bridge configuration. 
+   */
+  rpc DescribeBridge(DescribeBridgeRequest) returns (DescribeBridgeResponse);
+
+  /**
+   * Disconnects a given bridge.
+   */
+  rpc DisconnectBridge(DisconnectBridgeRequest) returns (google.protobuf.Empty);
+
+  /**
+   * Can be used to initiate or end a stream of conneciton status events.
+   */
+  rpc ConnectionStatusStream(SetStreamEnable) returns (stream ConnectionUpdate);
+
+  /**
+   * Configure bridge beep behavior.
+   */
+   rpc ConfigureBeep(ConfigureBeepRequest) returns (ConfigureBeepResponse);
+}
+
+message Bridge {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;
+
+  /**
+   * Additional platform specific details. These are defined in a separate
+   * protobuf files, one per device manufacturer.
+   */
+  //google.protobuf.Any details = 2;
+}
+
+/**
+ * This message is used for all of the query functions on the BridgeManagerService.
+ * All the query functions have the same shape if there's a need we can split
+ * out different messages later.
+ */
+message QueryBridgesRequest {
+  /**
+   * The partial scheme-less URI for the resource. For example,
+   * '//summit/bridge/123' will search for all bridges whose
+   * serial number begins with 123.
+   */
+  string query = 1;
+}
+
+/**
+ * This message is used for all of the query functions on the BridgeManagerService.
+ * All the query functions have the same shape if there's a need we can split
+ * out different messages later.
+ */
+message QueryBridgesResponse {
+  /**
+   * List of bridges.
+   */
+  repeated Bridge bridges = 1;
+}
+
+message ConnectBridgeRequest {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;
+
+  /**
+   * Telemetry mode of the bridge
+   */
+  string telemetry_mode = 2;
+
+  /**
+   * The uplink/downlink ratio between device and bridge
+   */
+  uint32 telemetry_ratio = 3;
+
+  /**
+   * Physical layer between bridge and computer
+   */
+  SummitPhysicalLayer physical_layer = 4;
+
+  /**
+   * Beep config of the bridge
+   */
+  SummitBeepConfig beep_enables = 5;
+
+  /**
+   * Number of retry attempts, default 3. A value of
+   * of -1 means retry infinitely.
+   */
+  google.protobuf.Int32Value retries = 6;
+}
+
+message ConnectBridgeResponse {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;  
+
+  /**
+   * Additional platform specific details. These are defined in a separate
+   * protobuf files, one per device manufacturer.
+   */
+  SummitConnectBridgeStatus connection_status = 2;
+}
+
+message DescribeBridgeRequest {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;  
+}
+
+message DescribeBridgeResponse {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;  
+
+  /**
+   * The type of device that is connected, for Summit it will always be "CTM2"
+   */
+  string module_type = 2;
+
+  /**
+   * The type of connection to the bridge, may be wired or wireless
+   */
+  string wire_type = 3;
+
+  /**
+   * Serial number of the bridge
+   */
+  string serial_number = 4;
+
+  /**
+   * Firmware version of the bridge
+   */
+  uint32 firmware_version = 5;
+
+  /**
+   * Battery level of the bridge in percent
+   */
+  uint32 battery_level = 6;
+
+  /**
+   * Overall battery status of the bridge
+   */
+  string battery_status = 7;
+
+  /**
+   * Telemetry mode of the bridge
+   */
+  string telemetry_mode = 8;
+
+  /**
+   * The uplink/downlink ratio between device and bridge
+   */
+  uint32 telemetry_ratio = 9;
+
+  /**
+   * Physical layer between bridge and computer
+   */
+  SummitPhysicalLayer physical_layer = 10;
+
+  /**
+   * Beep config of the bridge
+   */
+  SummitBeepConfig beep_enables = 11;
+
+  /**
+   * Additional platform specific error details. These are defined in a separate
+   * protobuf files, one per manufacturer.
+   */
+  SummitError error = 12;
+}
+
+message DisconnectBridgeRequest {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;
+}
+
+message SetStreamEnable {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;
+
+  /**
+   * Boolean flag indicating if stream should be
+   * started or stopped.
+   */
+  bool enable_stream = 2;
+}
+
+message ConnectionUpdate {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;
+
+  /**
+   * String indicating current connection status
+   */
+  string connection_status = 2;
+}
+
+message ConfigureBeepRequest {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;
+
+  /**
+   * Beep config for the bridge
+   * (default NONE)
+   */
+  SummitBeepConfig beep_config = 2;
+}
+
+message ConfigureBeepResponse {
+  /**
+   * Scheme-less URI describing the bridge resource.
+   * For example, '//summit/bridge/xxxxxxxxx' where
+   * 'xxxxxxxxx' is the serial number of the bridge.
+   */
+  string name = 1;
+
+
+  /**
+   * Additional platform specific error details. These are defined in a separate
+   * protobuf files, one per manufacturer.
+   */
+  SummitError error = 2;
+}

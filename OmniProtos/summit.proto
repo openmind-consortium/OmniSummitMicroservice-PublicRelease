@@ -1,0 +1,731 @@
+syntax = "proto3";
+package openmind;
+
+option csharp_namespace = "OpenMind";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+/**
+ * Physical layer to use for connection to bridge
+ */
+enum SummitPhysicalLayer {
+  USB = 0;
+  BLUETOOTH = 1;
+  BLUETOOTH_SERIAL_PORT = 2;
+  ANY = 3;
+}
+
+/**
+ * Beep code controls for bridge
+ */
+enum SummitBeepConfig {
+  NO_TONES_ENABLED = 0;
+  GENERAL_ALERT = 1;
+  TEL_M_COMPLETED = 2;
+  DEVICE_DISCOVERED = 4;
+  NO_DEVICE_DISCOVERED = 8;
+  TEL_M_LOST = 16;
+}
+
+/**
+ * Possible bridge connection statuses
+ */
+enum SummitConnectBridgeStatus {
+  UNCONNECTED = 0;
+  CONNECT_BRIDGE_SUCCESS = 1;
+  FAILED_INVALID_TELEMETRY = 2;
+  FAILED_CONNECT = 3;
+  FAILED_TIME_OUT = 4;
+  FAILED_CTM_VERSION_CHECK = 5;
+  FAILED_INCOMPATIBLE_CTM = 6;
+  FAILED_CTM_SILENCE = 7;
+}
+
+/**
+ * Possible device connectin statuses
+ */
+enum SummitConnectDeviceStatus {
+  UNKNOWN = 0;
+  CONNECT_DEVICE_SUCCESS = 1;
+  CRITICAL_ERROR = 2;
+  INITIALIZATION_ERROR = 4;
+  WARNING_NO_SUBJECT_ID = 8;
+  WARNING_UNEXPECTED_SUBJECT_INFO_FORMAT = 16;
+  WARNING_BAD_SUBJECT_INFO_CRC = 32;
+  WARNING_MEMORY_CORRUPTION_CHECK_FAILED = 64;
+  WARNING_CORRUPTED_MEMORY = 128;
+  WARNING_UNEXPECTED_FLASH_FORMAT_HEADER = 256;
+  WARNING_BAD_FLASH_HEADER_CRC = 512;
+  WARNING_BAD_PTM_BLOCK_CRC = 1024;
+  WARNING_BAD_PTM_BLOCK_READ = 2048;
+}
+
+/**
+ * API error codes
+ */
+enum SummitApiErrorCode {
+  NO_ERROR = 0;
+  NULL_ARGUMENT = 1;
+  INVALID_PARAMETER = 2;
+  UNCLONABLE_PARAMETER = 3;
+  UNABLE_TO_SYNC_REQUIRED_INFO = 4;
+  NO_VALID_SENSE_FRIENDLY_RATE = 5;
+  UNSUPPORTED_STIM_RATE = 6;
+  BAD_COMMAND_LIB_CAST = 7;
+  UNEXPECTED_EXCEPTION = 8;
+  IS_DISPOSED = 9;
+  NO_INS_CONNECTED = 10;
+  API_INITIALIZATION_NOT_DONE = 11;
+  INS_CONNECTION_ATTEMPTS_EXCEEDED = 12;
+  INS_INIT_ID_COMM_FAILED = 19;
+  INS_INIT_ID_FAILED = 20;
+  INS_DEVICE_ID_MISMATCH = 21;
+  INS_DEVICE_NOT_OLYMPUS = 22;
+  INS_SYNC_FAILED_AFTER_CHECKPOINT_RESTORE = 23;
+  INS_BAD_RESPONSE_CONSUME_BYTES_ERROR = 25;
+  INS_INIT_INCOMPATIBLE_FIRMWARE = 26;
+  INS_INIT_BAD_SUBJECT_INFO_CRC = 27;
+  INS_INIT_FLASH_CRC_MISMATCH = 28;
+  INS_INIT_FLASH_FORMAT_CAST_ERROR = 29;
+  INS_INIT_BAD_COMM_SUBJECT = 30;
+  INS_INIT_BAD_COMM_SUBJECT_CRC = 31;
+  INS_INIT_BAD_SUBJECT_CAST = 32;
+  NO_CTM_CONNECTED = 40;
+  INS_ALREADY_CONNECTED = 41;
+  CTM_COMMAND_TIMEOUT = 42;
+  CTM_UNEXPECTED_DISCONNECT = 43;
+  INS_UNEXPECTED_FLASH_FORMAT = 50;
+  INS_BAD_RTM_PTM_BLOCK = 51;
+  INS_BAD_SUBJECT_INFO_BLOCK = 52;
+  LOGS_NOT_STARTED = 60;
+  ORCA_REGISTRATION_FAILED = 61;
+  INS_BAD_LATENCY_TEST = 62;
+  INS_BAD_LEAD_INTEGRITY_TEST = 63;
+  INS_COMMAND_NOT_EXECUTED_DUE_TO_BATCH_ERROR = 64;
+  ADAPTIVE_STATE_WRITE_CLOCK_ERROR = 66;
+  TD_CHANNEL_HPF_NOT_CONSISTENT = 67;
+  FFT_1024_MAX_UPDATE_RATE_EXCEEDED = 68;
+  FFT_64_WINDOW_NOT_HANN_100 = 69;
+  FFT_BINS_REQUESTED_OUTSIDE_VALID_RANGE = 70;
+  GROUP_SWITCH_FAILED_NO_VALID_PROGRAM = 71;
+  ORCA_IMPROPERLY_CONFIGURED = 72;
+}
+
+enum SummitDeviceCommandCode {
+  UNUSED_00 = 0;
+  ID = 1;
+  READ_MEMORY = 2;
+  WRITE_MEMORY = 3;
+  ERASE_FLASH_SECTOR = 4;
+  READ_DEVICE_TIME = 5;
+  WRITE_DEVICE_TIME = 6;
+  RESET_STATUS = 7;
+  UNUSED_08 = 8;
+  PREVENT_APP_FROM_RUNNING_AFTER_RESET = 9;
+  WRITE_CONFIG_FILE = 10;
+  READ_CONFIG_FILE = 11;
+  AUTHENTICATE = 12;
+  WRITE_APPLICATION = 13;
+  ECHO = 14;
+  POR = 15;
+  GET_FLASH_MIRROR_INFO = 16;
+  READ_FLASH_MIRROR = 17;
+  RESET_FLASH_MIRROR = 18;
+  GET_LOG_INFO = 19;
+  RESET_LOG_READ_POINTER = 20;
+  READ_LOG_ENTRY = 21;
+  UNUSED_16 = 22;
+  UNUSED_17 = 23;
+  UNUSED_18 = 24;
+  UNUSED_19 = 25;
+  UNUSED_1A = 26;
+  UNUSED_1B = 27;
+  UNUSED_1C = 28;
+  READ_INSTRUMENT_DATA = 29;
+  WRITE_INSTRUMENT_DATA = 30;
+  CRC_INSTRUMENT_DATA = 31;
+  CHANGE_THERAPY_STATE = 32;
+  WRITE_DEVICE_PARAMETERS = 33;
+  WRITE_SLOT_PARAMETERS = 34;
+  WRITE_VERSION_PARAMETERS = 35;
+  CLEAR_SETTINGS = 36;
+  SAVE_THERAPY_CHECKPOINT = 37;
+  READ_THERAPY_SETTINGS = 38;
+  RESTORE_THERAPY_CHECKPOINT = 39;
+  MODIFY_DEVICE_SETTINGS = 40;
+  MODIFY_SLOT_SETTINGS = 41;
+  MODIFY_VERSION_SETTINGS = 42;
+  INCREMENT_DECREMENT = 43;
+  GLOBAL_AMPLITUDE_INCREMENT_DECREMENT = 44;
+  RESET_STACKS = 45;
+  CHANGE_ACTIVE_DEVICE = 46;
+  MODIFY_RECHARGE_SETTINGS = 47;
+  MODIFY_SLOT_AMPLITUDE_LIMITS = 48;
+  READ_SLOT_AMPLITUDE_LIMITS = 49;
+  ADAPTIVE_CHANGE_MODE = 50;
+  ADAPTIVE_WRITE_DELTA_LIMITS = 51;
+  ADAPTIVE_WRITE_DELTAS = 52;
+  ADAPTIVE_WRITE_STATE = 53;
+  ADAPTIVE_GO_TO_STATE = 54;
+  ADAPTIVE_CLEAR_SETTINGS = 55;
+  ADAPTIVE_READ_SETTINGS = 56;
+  ADAPTIVE_FORCE_STATE_CHANGE = 63;
+  WRITE_ACCELEROMETER_TRIM_DATA = 64;
+  READ_ACCELEROMETER_TRIM_DATA = 65;
+  WRITE_ACCELEROMETER_LOW_POWER_STATUS = 66;
+  READ_ACCELEROMETER_LOWER_POWER_STATUS = 67;
+  START_ACCELEROMETER_TEST = 68;
+  READ_ACCELEROMETER_TEST_DATA = 69;
+  ACCEL_ENABLE = 72;
+  START_LEAD_INTEGRITY_TEST = 96;
+  READ_LEAD_INTEGRITY_TEST_RESULTS = 97;
+  RESET_STIM_TIME_DIAGNOSTIC = 112;
+  NONRECHARGE_BATTERY_STATUS = 128;
+  MEASURE_ALTERNATIVE_CHARGE_CURRENT = 129;
+  UNUSED_82 = 130;
+  RECHARGE_STATUS = 131;
+  CLEAR_OVERCHARGE_STATUS = 132;
+  SET_BATTERY_SOC_VALUES = 133;
+  SET_LOCKED_MODE = 134;
+  START_LOAD_MEASUREMENTS = 135;
+  READ_LOAD_MEASUREMENTS = 136;
+  CHANGE_SENSING_STATE = 144;
+  READ_SENSING_CONFIGURATION = 145;
+  WRITE_SDC_CONFIGURATION = 146;
+  WRITE_FFT_CONFIGURATION = 147;
+  WRITE_POWER_CONFIGURATION = 148;
+  WRITE_SENSING_PARAMETERS = 149;
+  WRITE_DETECTION_PARAMETERS = 150;
+  READ_LR_DATA = 151;
+  LOG_EXTERNAL_EVENT = 152;
+  WRITE_READ_SENSING_BLANKING = 153;
+  WRITE_READ_CHOP_CLOCK_SETTINGS = 154;
+  WRITE_TEST_DETECTION_POWER_VALUES = 159;
+  INSTRUMENT_COMMUNICATION_ID = 192;
+  START_CP_SESSION = 193;
+  END_CP_SESSION = 194;
+  INTERROGATE = 208;
+  SET_IMPLANT_DATE = 209;
+  UNUSED_D2 = 210;
+  MANAGE_ERI_AND_EOS = 211;
+  STREAM_CONTROL = 217;
+}
+
+enum SummitBridgeCommandCode {
+  NONE = 0;
+  GET_VERSIONS = 1;
+  IDENTIFY_DEVICE = 3;
+  START_DEVICE_SESSION = 4;
+  END_DEVICE_SESSION = 5;
+  TELEMETRY_DOWNLINK = 6;
+  CHANGE_DEVICE_SESSION = 7;
+  GET_STATUS_INFORMATION = 8;
+  DEVICE_IDENTIFICATION_COMPLETE = 9;
+  BUTTON_ACTIVATED = 11;
+  TELEMETRY_UPLINK = 12;
+  CTM_OPERATION = 13;
+  DEVICE_IDENTIFIED = 14;
+  LOG_CTM_MESSAGE = 15;
+  PREVIOUS_DEVICE_IDENTIFIED = 30;
+}
+
+enum SummitErrorType {
+  UNDEFINED_TYPE = 0;
+  MASTER_ERROR = 1;
+  API_ERROR = 2;
+  COMMAND_ERROR = 3;
+  INSTRUMENT_ERROR = 4;
+}
+
+/**
+ * Platform specific API errors
+ */
+message SummitError {
+  /**
+   * The type of the Summit error
+   */
+   SummitErrorType error_type = 1;
+
+  /**
+   * Error code for the API call
+   */
+  SummitApiErrorCode reject_code = 2;
+
+  /**
+   * The device command code that caused the error
+   */
+  SummitDeviceCommandCode device_command_code = 3;
+
+  /**
+   * The bridge command code that caused the error
+   */
+  SummitBridgeCommandCode bridge_command_code = 4;
+
+  /**
+   * Human readable error string
+   */
+  string message = 5;
+
+  /**
+   * Timestamp of when the packet was sent
+   */
+  google.protobuf.Timestamp tx_time = 6;
+
+  /**
+   * Timestamp of when the response was received
+   */
+  google.protobuf.Timestamp rx_time = 7;
+
+  /**
+   * Number of attempts to receive a response within timeout
+   */
+  int32 transmit_attempts = 8;
+
+  /**
+   * Link status byte from the telemetry layer
+   */
+   bytes link_status = 9;
+}
+
+enum TimeDomainMuxInputs {
+  FLOATING = 0;
+  MUX_0 = 1;
+  MUX_1 = 2;
+  MUX_2 = 4;
+  MUX_3 = 8;
+  MUX_4 = 16;
+  MUX_5 = 32;
+  MUX_6 = 64;
+  MUX_7 = 128;
+}
+
+enum TimeDomainEvokedResponseEnable {
+  STANDARD = 0;        /* Standard SDC Channel (not an evoked input) */
+  EVOKED_0_INPUT = 16; /* Input to evoked response 0 */
+  EVOKED_1_INPUT = 32; /* Input to evoked response 1 */
+}
+
+enum TimeDomainLowPassFilterStage1 {
+  LPF_STAGE1_UNKNOWN = 0; /* Required by gRPC */
+  LPF_450_Hz = 9;  /* LPF 450 Hz */
+  LPF_100_HZ = 18; /* LPF 100 Hz */
+  LPF_50_HZ = 36;  /* LPF 50 Hz  */
+}
+
+enum TimeDomainLowPassFilterStage2 {
+  LPF_STAGE2_UNKNOWN = 0; /* Required by gRPC */
+  LPF_100_Hz = 9;   /* LPF 100 Hz  */
+  LPF_160_Hz = 11;  /* LPF 160 Hz  */
+  LPF_350_Hz = 12;  /* LPF 350 Hz  */
+  LPF_1700_Hz = 14; /* LPF 1700 Hz */
+}
+
+enum TimeDomainHighPassFilters {
+  HPF_0_85HZ = 0;  /* HPF 0.85 Hz */
+  HPF_1_2_HZ = 16; /* HPF 1.2 Hz  */
+  HPF_3_3_HZ = 32; /* HPF 3.3 Hz  */
+  HPF_8_6_HZ = 96; /* HPF 8.6 Hz  */
+}
+
+message SummitTimeDomainChannelConfig {
+  /**
+   * Minus mux input
+   */
+  TimeDomainMuxInputs minus = 1;
+  
+  /**
+   * Plus mux input
+   */
+  TimeDomainMuxInputs plus = 2;
+
+  /**
+   * The evoked mode
+   */
+  TimeDomainEvokedResponseEnable evoked_mode = 3;
+
+  /**
+   * Low pass filter stage 1
+   */
+  TimeDomainLowPassFilterStage1 low_pass_filter_stage1 = 4;
+
+  /**
+   * Low pass filter stage 2
+   */
+  TimeDomainLowPassFilterStage2 low_pass_filter_stage2 = 5;
+
+  /**
+   * High pass filter
+   */
+  TimeDomainHighPassFilters high_pass_filters = 6;
+
+  /**
+   * Disable the current channel's time domain stream
+   */
+   bool disabled = 7;
+}
+
+enum FastFourierTransformSizes {
+  SIZE_0064 = 0;
+  SIZE_0256 = 1;
+  SIZE_1024 = 3;
+}
+
+enum FastFourierTransformWindowAutoLoads {
+  HANN_UNKNOWN = 0; /* Required by gRPC */
+  HANN_100_PERCENT = 2;
+  HANN_50_PERCENT = 22;
+  HANN_25_PERCENT = 42;
+}
+
+enum FastFourierTransformWeightMultiplies {
+  TRANSFORM_WEIGHT_MULTIPLIES = 0; /* required by gRPC */
+  SHIFT_7 = 8;  /* Shift which 32 bits to keep down 7 (throw away upper 7 bits) */ 
+  SHIFT_6 = 9;  /* Shift which 32 bits to keep down 6 (throw away upper 6 bits) */
+  SHIFT_5 = 10; /* Shift which 32 bits to keep down 5 (throw away upper 5 bits) */
+  SHIFT_4 = 11; /* Shift which 32 bits to keep down 4 (throw away upper 4 bits) */
+  SHIFT_3 = 12; /* Shift which 32 bits to keep down 3 (throw away upper 3 bits) */
+  SHIFT_2 = 13; /* Shift which 32 bits to keep down 2 (throw away upper 2 bits) */
+  SHIFT_1 = 14; /* Shift which 32 bits to keep down 1 (throw away upper bit) */
+  SHIFT_0 = 15; /* Keep upper most 32 bits */
+}
+
+message SummitFastFourierTransformStreamConfiguration {
+  /**
+   * The FFT size
+   */
+  FastFourierTransformSizes size = 1;
+
+  /**
+   * The FFT interval in milliseconds (50-10000)
+   */
+  int32 interval = 2;
+
+  /**
+   * The FFT window
+   */
+  FastFourierTransformWindowAutoLoads window_load = 3;
+
+  /**
+   * Whether or not to enable the FFT window
+   */
+  bool enable_window = 4;
+
+  /**
+   * The band formation configuration byte. 7 is highest risk of overflow (missing upper 8 bits of power channel).
+   * 0 means no risk of overflow, but lower resolution because lower 8 bits are ignored.
+   *
+   * Default: SHIFT_7
+   */
+  FastFourierTransformWeightMultiplies band_formation_config = 5;
+
+  /**
+   * The number of bins to stream. 0 means full FFT, non zero means partial FFT.
+   *
+   * Default: 0
+   */
+  int32 bins_to_stream = 6;
+
+  /**
+   * The bin offset to use when streaming. 0 means normal - start at bin 0
+   *
+   * Defaukt: 0
+   */
+  int32 bins_to_stream_offset = 7;
+}
+
+enum PowerBandEnables {
+  POWER_BAND_ENABLES_UNKNOWN = 0; /* required by gRPC */
+  CHANNEL_0_BAND_0_ENABLED = 1;   /* Channel 0 Band 0 enabled */
+  CHANNEL_0_BAND_1_ENABLED = 2;   /* Channel 0 Band 1 enabled */
+  CHANNEL_1_BAND_0_ENABLED = 4;   /* Channel 1 Band 0 enabled */
+  CHANNEL_1_BAND_1_ENABLED = 8;   /* Channel 1 Band 1 enabled */
+  CHANNEL_2_BAND_0_ENABLED = 16;  /* Channel 2 Band 0 enabled */
+  CHANNEL_2_BAND_1_ENABLED = 32;  /* Channel 2 Band 1 enabled */
+  CHANNEL_3_BAND_0_ENABLED = 64;  /* Channel 3 Band 0 enabled */
+  CHANNEL_3_BAND_1_ENABLED = 128; /* Channel 3 Band 1 enabled */
+}
+
+message PowerBandConfiguration {
+  /**
+   * The power band start bin.
+   */
+  uint32 band_start = 1;
+
+  /**
+   * The power band stop bin.
+   */
+  uint32 band_stop = 2;
+}
+
+message SummitPowerStreamConfiguration {
+  /**
+   * Indicate which bands need to be enabled for the power channels, 8 total
+   */
+  repeated bool power_band_enables = 1;
+
+  /**
+   * Power configuration for each of the power bands, 8 total.
+   */
+  repeated PowerBandConfiguration power_band_configuration = 2;
+}
+
+enum BridgingConfiguration {
+  BRIDGE_NONE = 0;           /* Bridging not enabled */
+  BRIDGE_0_TO_2_ENABLED = 4; /* Bridging 0/2 Enabled */
+  BRIDGE_1_TO_3_ENABLED = 8; /* Bridging 1/3 Enabled */
+}
+
+enum StreamingFrameRate {
+  FRAME_RATE_UNKNOWN = 0; /* Required by gRPC */
+  FRAME_30_MS = 3;   /* Frame 30 MS */
+  FRAME_40_MS = 4;   /* Frame 40 MS */
+  FRAME_50_MS = 5;   /* Frame 50 MS */
+  FRAME_60_MS = 6;   /* Frame 60 MS */
+  FRAME_70_MS = 7;   /* Frame 70 MS */
+  FRAME_80_MS = 8;   /* Frame 80 MS */
+  FRAME_90_MS = 9;   /* Frame 90 MS */
+  FRAME_100_MS = 10; /* Frame 100 MS */
+}
+
+enum LoopRecordingTriggers {
+  NO_LOOP_RECORDING_TRIGGERS = 0;/* No loop recording triggers */
+  STATE_0 = 1;   /* The state 0 can trigger the loop recording */
+  STATE_1 = 2;   /* The state 1 can trigger the loop recording */
+  STATE_2 = 4;   /* The state 2 can trigger the loop recording */
+  STATE_3 = 8;   /* The state 3 can trigger the loop recording */
+  STATE_4 = 16;  /* The state 4 can trigger the loop recording */
+  STATE_5 = 32;  /* The state 5 can trigger the loop recording */
+  STATE_6 = 64;  /* The state 6 can trigger the loop recording */
+  STATE_7 = 128; /* The state 7 can trigger the loop recording */
+  STATE_8 = 256; /* The state 8 can trigger the loop recording */
+}
+
+message MiscellaneousStreamConfiguration {
+  /**
+   * Bridging configuration
+   */
+  BridgingConfiguration bridging = 1;
+
+  /**
+   * Configure the stream frame rate (50 ms is recommended). 
+   */
+  StreamingFrameRate streaming_rate = 2;
+
+  /**
+   * Configure loop recording triggers.
+   */
+  LoopRecordingTriggers loop_record_triggers = 3;
+
+  /**
+   * Configure the loop recording post buffer time in seconds.
+   */
+  uint32 loop_recording_post_buffer_time = 4;
+}
+
+enum AccelerometerSampleRate {
+  SAMPLE_64 = 0;  /* 64 Hz */
+  SAMPLE_32 = 1;  /* 32 Hz */
+  SAMPLE_16 = 2;  /* 16 Hz */
+  SAMPLE_08 = 3;  /* 8 Hz */
+  SAMPLE_04 = 4;  /* 4 Hz */
+  DISABLED = 255; /* Disable the accel */
+}
+
+message SummitAccelerometerStreamConfiguration {
+  /**
+   * Accelerometer sample rate
+   */
+  AccelerometerSampleRate sample_rate = 1;
+}
+
+enum DetectorNumber {
+  DETECTOR_O = 0;
+  DETECTOR_1 = 1;
+}
+
+enum DetectionEnables {
+  /* No enables are set. This means that single threshold detect mode is used */
+  DETECTION_DISABLED = 0;
+  
+  /* Enable dual threshold (band) detect. If this bit is not set, single      *
+   * detect mode is used.                                                     */
+  DUAL_THRESHOLD_ENABLED = 1;
+  
+  /* Blank both LDs based on a state change from this LD. The blank duration  *
+   * specified for each LD is used (if 0 duration is set, then no blanking    *
+   * will occur). If this bit is not set, only this LD is blanked.            */
+  BLANK_BOTH = 2;
+}
+
+enum DetectionInputs {
+  NO_DETECTION_INPUTS = 0;  /* No inputs are chosen */
+  CHANNEL_0_BAND_0 = 1;   /* Power channel 0 band 0 */
+  Channel_0_Band_1 = 2;   /* Power channel 0 band 1 */
+  Channel_1_Band_0 = 4;   /* Power channel 1 band 0 */
+  Channel_1_Band_1 = 8;   /* Power channel 1 band 1 */
+  Channel_2_Band_0 = 16;  /* Power channel 2 band 0 */
+  Channel_2_Band_1 = 32;  /* Power channel 2 band 1 */
+  Channel_3_Band_0 = 64;  /* Power channel 3 band 0 */
+  Channel_3_Band_1 = 128; /* Power channel 3 band 1 */
+}
+
+message LinearDiscriminantFeature {
+  /* Gets or sets the normalization subtract term for each input/feature of the LD */
+  fixed32 normalization_subtract_vector = 1;
+
+  /* Gets or sets the normalization multiply term for each input/feature of the LD */
+  fixed32 NormalizationMultiplyVector = 2;
+
+  /* Gets or sets the weight vector multiply term for each input/feature of the LD */
+  fixed32 weight_vector = 3;
+}
+
+message SummitLinearDetectorConfiguration {
+  /**
+   * Which detector to apply the parameters to
+   */
+  DetectorNumber detector_number = 1;
+
+  /* The detection enable: single/dual band mode, normalization        *
+   * used/not used and overall detector enable                         */
+  DetectionEnables detection_enable = 2;
+
+  /* Gets or sets the detector's update rate. Each power feature input *
+   * will be summed on each FFT interval and the averaged power value  *
+   * will be evaluated for detection state change when the LD Update   *
+   * rate count is met.                                                */
+  uint32 update_rate = 3;
+
+  /* Gets or sets the onsetDuration in update rate tic counts. Number  *
+   * of consecutive LD Update Rate counts that a Rising detect signal  *
+   * must exceed a Bias threshold before a detection state change is   *
+   * declared if not already in the detect state. In dual detect mode, *
+   * each Bias threshold has an independent onset counter to be        *
+   * compared against the Onset detect duration value                  */
+  uint32 onset_duration = 4;
+
+  /* Gets or sets the terminationDuration in update rate tic counts.   *
+   * Number of consecutive LD Update Rate counts that a Falling detect *
+   * signal must be below a Bias threshold before a detection state    *
+   * change is declared if already in the detect state. In dual detect *
+   * mode, each Bias threshold has an independent termination counter  *
+   * to be compared against the Termination detect duration value.     */
+  uint32 termination_duration = 5;
+
+  /* Gets or sets the duration in update rate tics that the detector   *
+   * will hold off evaluation after enablement.                        */
+  uint32 holdoff_time = 6;
+
+  /* Gets or sets the blanking duration upon state change (in fft      *
+   * interval counts).                                                 */
+  uint32 blanking_duration_upon_state_change = 7;
+
+  /* Gets or sets the features used to process each of the 4 inputs.   *
+   * (Normalization multiply, weight multiply, and normalization       *
+   * subtract)                                                         */
+  repeated LinearDiscriminantFeature features = 8;
+
+  /* Gets or sets the bias term for the LD (only one bias is used for  *
+   * single mode).                                                     */
+  repeated fixed32 bias_term = 9;
+
+  /* Gets or sets the fractional fixed point value (0-30) used for the *
+   * preceding fixed point terms.                                      */
+  fixed32 fractional_fixed_point_value = 10;
+}
+
+enum FFTStreamChannel {
+  CH0 = 0;  /* Channel 0 */
+  CH1 = 1;  /* Channel 1 */
+  CH2 = 2;  /* Channel 2 */
+  CH3 = 3;  /* Channel 3 */
+}
+
+message SummitSenseEnablesConfiguration{
+ /**
+	 Set all enables to false for SenseEnables: None
+	 None will turn off sense
+   */
+  /**
+	 FFT Stream Channel. Must have corresponding time domain channel (0-3) enabled
+   */
+	FFTStreamChannel fft_stream_channel = 1;
+
+	/**
+	 Enable TimeDomain Sensing on device
+   */
+	bool enable_timedomain = 2;
+
+	/**
+	 Enable FFT Sensing on device. Must enable TimeDomain to enable FFT.
+   */
+	bool enable_fft = 3;
+
+	/**
+	 Enable Power Sensing on device. Must enable TimeDomain and FFT to enable Power.
+   */
+	bool enable_power = 4;
+
+	/**
+	 Enable Linear Detector 0 sensing on device
+   */
+	bool enable_ld0 = 5;
+
+	/**
+	 Enable Linear Detector 1 sensing on device
+   */
+	bool enable_ld1 = 6;
+
+	/**
+	 Enable Adaptive Stim sense on device
+   */
+	bool enable_adaptive_stim = 7;
+
+	/**
+	 Enable Loop Recording sense on device
+   */
+	bool enable_loop_recording = 8;
+}
+
+message SummitStreamEnablesConfiguration{
+   /**
+	 Enable TimeDomain stream. False to disable
+   */
+	bool enable_timedomain = 1;
+
+	/**
+	 Enable FFT stream. False to disable
+   */
+	bool enable_fft = 2;
+
+	/**
+	 Enable Power stream. False to disable
+   */
+	bool enable_power = 3;
+
+	/**
+	 Enable Accelerometry stream. False to disable
+   */
+	bool enable_accelerometry = 4;
+
+	/**
+	 Enable Detector stream. False to disable
+   */
+	bool enable_detector = 5;
+
+	/**
+	 Enable Adaptive State stream. False to disable
+   */
+	bool enable_adaptive_state = 6;
+
+	/**
+	 Enable LoopRecordMarkerEcho stream. False to disable
+   */
+	bool enable_loop_record_marker_echo = 7;
+
+	/**
+	 Enable Time stream. False to disable
+   */
+	bool enable_time = 8;
+}
