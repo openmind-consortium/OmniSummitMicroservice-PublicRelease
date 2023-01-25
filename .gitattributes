@@ -1,7 +1,0 @@
-./Libraries/wclCommon.dll.enc filter=lfs diff=lfs merge=lfs -text
-./Libraries/wclCommunication.dll.enc filter=lfs diff=lfs merge=lfs -text
-./Libraries/Medtronic.NeuroStim.Olympus.dll.enc filter=lfs diff=lfs merge=lfs -text
-./Libraries/Medtronic.SummitAPI.dll.enc filter=lfs diff=lfs merge=lfs -text
-./Libraries/Medtronic.TelemetryM.dll.enc filter=lfs diff=lfs merge=lfs -text
-./Libraries/NLog.dll.enc filter=lfs diff=lfs merge=lfs -text
-./Libraries/wclBluetoothFramework.dll.enc filter=lfs diff=lfs merge=lfs -text

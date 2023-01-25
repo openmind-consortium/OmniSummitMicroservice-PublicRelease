@@ -1,4 +1,4 @@
-Copyright (c) [2020-2023] University of Washington, Brown University, Oxford University, The Board of Trustees of the Leland Stanford Junior University, and University of California at San Francisco. Developed as part of the Open Mind Consortium. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+Copyright (c) [2020-2022] University of Washington, Brown University, Oxford University, The Board of Trustees of the Leland Stanford Junior University, and University of California at San Francisco. Developed as part of the Open Mind Consortium. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
  
 •Redistributions of source code must retain the copyright notice, this list of conditions and the following disclaimer.
 

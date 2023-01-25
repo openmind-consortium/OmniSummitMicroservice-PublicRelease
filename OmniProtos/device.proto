@@ -5,6 +5,7 @@ option csharp_namespace = "OpenMind";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
 import "summit.proto";
 
 service DeviceManagerService {
@@ -83,6 +84,47 @@ service DeviceManagerService {
    * Lead Integrity Test
    */
   rpc LeadIntegrityTest (ImpedanceRequest) returns (ImpedanceResponse);
+
+  /**
+  * Change the amplitude 
+  */
+  rpc StimChangeStepAmp (StimChangeStepAmpRequest) returns (StimChangeStepAmpResponse); 
+
+  /**
+  * Change the pulse width 
+  */
+  rpc StimChangeStepPW (StimChangeStepPWRequest) returns (StimChangeStepPWResponse);
+
+  /**
+  * Change the stimulation frequency 
+  */
+  rpc StimChangeStepFrequency (StimChangeStepFrequencyRequest) returns (StimChangeStepFrequencyResponse);
+
+  /**
+  * Turn on therapy 
+  */  
+  rpc StimChangeTherapyOn (StimChangeTherapyOnRequest) returns (StimChangeTherapyOnResponse); 
+
+  /**
+  * Turn off therapy 
+  */
+  rpc StimChangeTherapyOff (StimChangeTherapyOffRequest) returns (StimChangeTherapyOffResponse);
+
+  /**
+  * Change active group 
+  */
+  rpc StimChangeActiveGroup (StimChangeActiveGroupRequest) returns (StimChangeActiveGroupResponse);
+
+  /**
+  * Read the active group info 
+  */
+  rpc ReadGeneralInfo (ReadGeneralInfoRequest) returns (ReadGeneralInfoResponse); 
+
+  /**
+  * Read the stimulation settings
+  */
+  rpc ReadStimGroup (ReadStimGroupRequest) returns (ReadStimGroupResponse);
+  
 }
 
 message Device {
@@ -874,4 +916,592 @@ message LeadList{
    * lead 1
    */
   int32 lead2 = 2;
+}
+
+message StimChangeStepAmpRequest {
+
+  /**
+  * Scheme-less URI describing the device resource. For example,
+  * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+  * serial number of the bridge and 'yyyyyy' is the serial number
+  * of the device.
+  */
+  string name = 1;
+
+  /** 
+  * The program to apply the amplitude change to
+  */ 
+  int32 program_number = 2;
+
+  /** 
+  * The change in amplitude to apply in milliamps, 0.1 resolution
+  */ 
+  double amp_delta_milliamps = 3;
+
+}
+
+message StimChangeStepAmpResponse {
+
+  /** 
+  * Output buffer that will be written with the new 
+  * stimulation amplitude in milliamps. Null if a critical 
+  * error occurs or if an invalid parameter was sent.
+  */
+  double new_stim_amplitude = 1;
+
+  /**
+  * Additional platform specific error details. These are defined in a separate
+  * protobuf files, one per manufacturer.
+  */
+  SummitError error = 2;
+
+}
+
+message StimChangeStepPWRequest {
+
+  /**
+  * Scheme-less URI describing the device resource. For example,
+  * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+  * serial number of the bridge and 'yyyyyy' is the serial number
+  * of the device.
+  */
+  string name = 1;
+
+  /** 
+  * The program to apply the pulse width change to
+  */ 
+  int32 program_number = 2;
+
+  /** 
+  * The change in pulsewidth to apply in microseconds, 10 microsecond resolution
+  */ 
+  int32 pw_delta_microseconds = 3;
+
+}
+
+message StimChangeStepPWResponse {
+
+  /** 
+  * Output buffer that will be written with the new stimulation 
+  * pulse width in microseconds. Null if a critical error occurs 
+  * or if an invalid parameter was sent.
+  */
+  int32 new_stim_pulse_width = 1;
+
+  /**
+  * Additional platform specific error details. These are defined in a separate
+  * protobuf files, one per manufacturer.
+  */
+  SummitError error = 2;
+
+}
+
+message StimChangeStepFrequencyRequest {
+
+  /**
+  * Scheme-less URI describing the device resource. For example,
+  * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+  * serial number of the bridge and 'yyyyyy' is the serial number
+  * of the device.
+  */
+  string name = 1;
+
+  /** 
+  * The change in stimulation period to apply, resolution is in 0.1 Hz
+  */ 
+  double freq_delta = 2;
+
+  /** 
+  * Boolean indicating if a sensing friendly rate should be enforced or not
+  */ 
+  bool enforce_sense_friendly = 3;
+
+}
+
+message StimChangeStepFrequencyResponse {
+
+  /** Output buffer that will be written with the new stimulation  
+  * frequency in Hz, 0.1Hz resolution. Null if a critical error 
+  * occurs or if an invalid parameter was sent.
+  */
+  double new_stim_frequency = 1;
+
+  /**
+  * Additional platform specific error details. These are defined in a separate
+  * protobuf files, one per manufacturer.
+  */
+  SummitError error = 2;
+
+}
+
+message StimChangeTherapyOnRequest {
+
+  /**
+  * Scheme-less URI describing the device resource. For example,
+  * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+  * serial number of the bridge and 'yyyyyy' is the serial number
+  * of the device.
+  */
+  string name = 1;
+
+}
+
+message StimChangeTherapyOnResponse {
+
+  /**
+  * Additional platform specific error details. These are defined in a separate
+  * protobuf files, one per manufacturer.
+  */
+  SummitError error = 1;
+
+}
+
+message StimChangeTherapyOffRequest {
+
+  /**
+  * Scheme-less URI describing the device resource. For example,
+  * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+  * serial number of the bridge and 'yyyyyy' is the serial number
+  * of the device.
+  */
+  string name = 1;
+  
+  /** Indicates if soft start parameters should be used 
+  * to ramp down stim if true, or if should just jump to 
+  * off if false
+  */
+  bool with_ramp = 2; 
+
+}
+
+message StimChangeTherapyOffResponse {
+
+  /**
+  * Additional platform specific error details. These are defined in a separate
+  * protobuf files, one per manufacturer.
+  */
+  SummitError error = 1;
+
+}
+
+enum GroupNumber {
+
+  Group0 = 0;
+  Group1 = 1;
+  Group2 = 2;
+  Group3 = 3;
+
+}
+
+message StimChangeActiveGroupRequest {
+
+  /**
+  * Scheme-less URI describing the device resource. For example,
+  * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+  * serial number of the bridge and 'yyyyyy' is the serial number
+  * of the device.
+  */
+  string name = 1;
+
+  /** 
+  * The new stimulation group to activate
+  */ 
+  GroupNumber new_group_num = 2; 
+
+}
+
+message StimChangeActiveGroupResponse {
+  /**
+  * Additional platform specific error details. These are defined in a separate
+  * protobuf files, one per manufacturer.
+  */
+  SummitError error = 1;
+
+}
+
+message ReadGeneralInfoRequest {
+
+/**
+  * Scheme-less URI describing the device resource. For example,
+  * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+  * serial number of the bridge and 'yyyyyy' is the serial number
+  * of the device.
+  */
+  string name = 1;
+
+}
+
+message ReadGeneralInfoResponse {
+
+  /* Gets or sets the type */ 
+  InterrogateTypes Type = 1; 
+
+  /* Gets or sets the implant date */ 
+  TimeOfDay ImplantDate = 2; 
+
+  /* Gets or sets the device time */
+  TimeOfDay DeviceTime = 3; 
+
+  /* Gets or sets the therapy status data */ 
+  TherapyStatusByte TherapyStatusData = 4; 
+
+  /* Gets or sets a value indicating whether this instance is therapy unavailable */ 
+  bool IsTherapyUnavailable = 5; 
+
+  /* Gets or sets a value indicating whether this instance is in CP session */ 
+  bool IsInCPSession = 6; 
+
+  /* Gets or sets the battery status (0-100%) */ 
+  bytes BatteryStatus = 7; 
+
+  /* Gets or sets the device serial number */ 
+  repeated bytes DeviceSerialNumber = 8; 
+
+  /* Gets or sets the hybrid serial number */ 
+  repeated bytes HybridSerialNumber = 9; 
+
+  /* Gets or sets the Tel-M Device ID */ 
+  repeated bytes TelMDeviceId = 10; 
+
+  /* Gets or sets a value indicating whether this instance 
+  * is mri mode on. This will always be off */ 
+  bool IsMriModeOn = 11; 
+
+  /* Gets or sets a value indicating whether this instance is overvoltage */ 
+  bool IsOvervoltage = 12; 
+
+  /* Gets a value indicating whether the device is giving an early replacement indication */ 
+  bool IsEri = 13; 
+
+  /* Gets a value indicating whether the device is at end of service */ 
+  bool IsEos = 14; 
+
+  /* Gets the days until end of service */ 
+  uint32 DaysUntilEos = 15; 
+
+  /**
+  * Additional platform specific error details. These are defined in a separate
+  * protobuf files, one per manufacturer.
+  */
+  SummitError error = 16;
+
+}
+
+message ReadStimGroupRequest {
+
+  /**
+  * Scheme-less URI describing the device resource. For example,
+  * '//summit/bridge/xxxxxx/device/yyyyyy' where 'xxxxxx' is the
+  * serial number of the bridge and 'yyyyyy' is the serial number
+  * of the device.
+  */
+  string name = 1;
+
+  /** 
+  * Indicates which group to read from the INS
+  */
+  GroupNumber group_index = 2; 
+
+}
+
+message ReadStimGroupResponse {
+
+  /** Gets or sets the amplitude resolution. */ 
+  bytes AmplitudeResolution0_2mA = 1; 
+
+  /** Reserved field */ 
+  bytes Reserved1 = 2; 
+
+  /** Reserved field */ 
+  bytes Reserved2 = 3; 
+
+  /** Gets or sets the pulse width lower limit (10 us per LSB) */ 
+  bytes PulseWidthLowerLimit = 4; 
+
+  /** Gets or sets the pulse width upper limit (10 us per LSB) */ 
+  bytes PulseWidthUpperLimit = 5; 
+
+  /** Gets or sets the rate period */ 
+  uint32 RatePeriod = 6; 
+
+  /** Gets or sets the rate period lower limit */ 
+  uint32 RatePeriodLowerLimit = 7; 
+
+  /** Gets or sets the rate period upper limit */ 
+  uint32 RatePeriodUpperLimit = 8; 
+
+  /** Gets or sets a value indicating whether */ 
+  bool CyclingEnabled = 9; 
+
+  /** Gets or sets the cycle on time */ 
+  CycleTimeShort CycleOnTime = 10; 
+
+  /** Gets or sets the cycle off time */ 
+  CycleTimeShort CycleOffTime = 11; 
+
+  /** Gets or sets reserved 3 byte */ 
+  bytes Reserved3 = 12; 
+
+  /** Gets or sets the ramp time */ 
+  bytes RampTime = 13; 
+
+  /** Gets or sets the ramping feature definition */ 
+  RampingTypes RampRepeat = 14; 
+
+  /** Gets or sets the programs */ 
+  repeated TherapyProgram Programs = 15; 
+
+  /** Gets or sets the therapy mode */ 
+  TherapyStatusTypes Mode = 16; 
+
+  /** Gets or sets the valid flag for the device level parameters */ 
+  bool Valid = 17; 
+
+  /** No comment */ 
+  GroupNumber Index = 18; 
+
+  /** The rate in Hz */ 
+  double RateInHz = 19; 
+
+  /** The upper limit rate in Hz */ 
+  double RateUpperLimitInHz = 20; 
+
+  /** The lower limit rate in Hz */ 
+  double RateLowerLimitInHz = 21; 
+
+  /** The pulse width upper limit in microseconds */ 
+  int32 PulseWidthUpperLimitInMicroseconds = 22; 
+
+  /** The pulse width lower limit in microseconds */ 
+  int32 PulseWidthLowerLimitInMicroseconds = 23; 
+
+  /** Gets the device level parameters */ 
+  repeated bytes DeviceLevelParameters = 24; 
+
+  /**
+  * Additional platform specific error details. These are defined in a separate
+  * protobuf files, one per manufacturer.
+  */
+  SummitError error = 25;
+
+}
+
+/** Class representing a CycleTime */ 
+message CycleTimeShort{
+
+  /** Gets or Sets the time */ 
+  uint32 Time = 1; 
+
+  /** Gets or Sets the units */ 
+  CyclingUnits Units = 2; 
+
+}
+
+/** Defines the units of the cycling value */ 
+enum CyclingUnits{
+
+  UNITS_100_MS = 0; /* Each Cycling Value LSB is 100ms */
+  UNITS_1_MS = 1; /* Each Cycling Value LSB is 1ms */
+  UNITS_10_MS = 2; /* Each Cycling Value LSB is 10ms */
+
+}
+
+/** Enables for Ramping */ 
+enum RampingTypes{
+
+  RAMP_NONE = 0; /* None */ 
+  UP_ENABLED = 1; /* Enable Ramp Up */ 
+  DOWN_ENABLED = 2; /* Enable Ramp Down */ 
+  REPEAT_RAMP_UP = 4; /* Enable Ramp Up Repeat */ 
+
+}
+
+/** Class representing a Therapy Program Setting */ 
+message TherapyProgram{
+
+  /** Gets or sets the misc settings */ 
+  TherapyMiscProgSettings MiscSettings = 1; 
+
+  /** Gets or sets the rate multiplier */ 
+  bytes ReservedRateMultiplier = 2; 
+
+  /** Gets or sets the is enabled */ 
+  ProgramEnables IsEnabled = 3; 
+
+  /** Gets or sets the amplitude */ 
+  bytes Amplitude = 4; 
+
+  /** Gets or sets the width of the pulse */ 
+  bytes PulseWidth = 5; 
+
+  /** Gets or sets the electrodes */ 
+  TherapyElectrodes Electrodes = 6; 
+
+  /** Gets or sets the Reserved */ 
+  repeated bytes Reserved = 7; 
+
+  /** Gets or sets a value indicating whether the set of amp, pw, and electrodes is valid */ 
+  bool SubValid = 8; 
+
+  /** Gets or sets the Reserved2 */ 
+  repeated bytes Reserved2 = 9; 
+
+  /** Gets or sets the valid flag */ 
+  bool Valid = 10; 
+
+  /** Get the amplitude in milliamps */ 
+  double AmplitudeInMilliamps = 11; 
+
+  /** Get the pulse width in milliamps */ 
+  uint32 PulseWidthInMicroseconds = 12; 
+
+}
+
+/** Class representing miscellaneous program settings: 
+* program level cycling and active recharge ratio */ 
+message TherapyMiscProgSettings{
+
+  /* Gets or sets the cycling enabled flag */ 
+  bool CyclingEnable = 1; 
+
+  /* Gets or sets the Unused */ 
+  bytes Unused = 2; 
+
+  /* Gets or sets the Unused2 */ 
+  bytes Unused2 = 3; 
+
+  /* Gets or sets the Active Recharge Ratio */ 
+  ActiveRechargeRatios ActiveRechargeRatio = 4; 
+
+}
+
+/** Therapy amplitude ratios */ 
+enum ActiveRechargeRatios{
+
+  PASSIVE_ONLY = 0; /* Passive Recharge Only */ 
+  ACTIVE_0_5 = 5; /* Active Recharge, amplitude ratio 0.5x */ 
+  ACTIVE_0_6 = 6; /* Active Recharge, amplitude ratio 0.6x */ 
+  ACTIVE_0_7 = 7; /* Active Recharge, amplitude ratio 0.7x */ 
+  ACTIVE_0_8 = 8; /* Active Recharge, amplitude ratio 0.8x */ 
+  ACTIVE_0_9 = 9; /* Active Recharge, amplitude ratio 0.9x */ 
+  ACTIVE_1_0 = 10; /* Active Recharge, amplitude ratio 1.0x */ 
+  ACTIVE_1_1 = 11; /* Active Recharge, amplitude ratio 1.1x */ 
+  ACTIVE_1_2 = 12; /* Active Recharge, amplitude ratio 1.2x */ 
+  ACTIVE_1_3 = 13; /* Active Recharge, amplitude ratio 1.3x */ 
+  ACTIVE_1_4 = 14; /* Active Recharge, amplitude ratio 1.4x */ 
+  ACTIVE_1_5 = 15; /* Active Recharge, amplitude ratio 1.5x */ 
+
+}
+
+/** The Program Enable Values */ 
+enum ProgramEnables{
+
+  VERSION_0_ENABLED = 0; /* The version0 and enabled */ 
+  VERSION_1_ENABLED = 1; /* The version1 and enabled */ 
+  VERSION_2_ENABLED = 2; /* The version2 and enabled */ 
+  VERSION_NULL = 3; /* The version null and enabled */ 
+  VERSION_0_DISABLED = 16; /* The version0 and disabled */ 
+  VERSION_1_DISABLED = 17; /* The version1 and disabled */ 
+  VERSION_2_DISABLED = 18; /* The version2 and disabled */ 
+  VERSION_NULL_DISABLED = 19; /* The version null and enabled */ 
+
+}
+
+/** An Enumerable list of the class Electrode */ 
+message TherapyElectrodes{
+
+  /* Gets the number of elements contained in the T:System.Collections.Generic.ICollection`1 */ 
+  int32 Count = 1; 
+
+  /* Gets a value indicating whether the T:System.Collections.Generic.ICollection`1 is read-only */ 
+  bool IsReadOnly = 2; 
+
+  /* Gets or sets the Electrode at the specified index */ 
+  Electrode This = 3; 
+
+  /* Gets or sets the Reserved */ 
+  repeated bytes Reserved = 4; 
+
+  /* Gets or sets a value indicating whether the set of amp, pw, and electrodes is valid */ 
+  bool SubValid = 5; 
+
+  /* Gets or sets the Reserved2 */ 
+  repeated bytes Reserved2 = 6; 
+
+  /* Gets or sets the valid flag */ 
+  bool Valid = 7; 
+
+  /* Get the amplitude in milliamps */ 
+  double AmplitudeInMilliamps = 8; 
+
+  /* Get the pulse width in milliamps */ 
+  int32 PulseWidthInMicroseconds = 9; 
+
+}
+
+/* Class defining the properties of a stimulation electrode */ 
+message Electrode{
+
+  /* Gets or sets the value field */ 
+  bytes value = 1; 
+
+  /* Gets or sets the electrode type 0x01 = Anode, 0x00 = Cathode */ 
+  ElectrodeTypes ElectrodeType = 2; 
+
+  /* Gets or sets the reserved 1 field */ 
+  bytes Reserved1 = 3; 
+
+  /* Gets or sets a value indicating whether the electrode is off */ 
+  bool IsOff = 4; 
+
+}
+
+/* Is the Electrode an Anode or Cathode */ 
+enum ElectrodeTypes{
+
+  CATHODE = 0; /* Electrode is a Cathode */ 
+  ANODE = 1 ; /* Electrode is an Anode */ 
+
+}
+
+/** Therapy Status Byte **/
+message TherapyStatusByte{
+
+  /** Gets or sets the therapy status **/ 
+  TherapyStatusTypes TherapyStatus = 1; 
+
+  /** Gets or sets the active group **/
+  GroupNumber ActiveGroup = 2; 
+
+}
+
+/** Therapy Status */ 
+enum TherapyStatusTypes{
+
+  OFF = 0; /* Off */ 
+  ON = 1; /* On */ 
+  LEAD_INTEGRITY = 2; /* Lead Integrity */ 
+  TRANSITION_TO_OFF = 3; /* The transition to off */
+  TRANSITION_TO_ACTIVE = 4; /* The transition to active */ 
+  TRANSITION_TO_LEAD_INTEGRITY = 5; /* The transition to lead integrity */ 
+
+}
+
+/** Interrogate Command Subtypes */ 
+enum InterrogateTypes{
+
+  GENERAL = 0; /* General Interrogate */ 
+  OOR = 1; /* OOR Interrogate */ 
+
+}
+
+/** Time of Day */ 
+message TimeOfDay{
+
+  /* Gets or sets the seconds */ 
+  uint32 Seconds = 1; 
+
+  /* Gets or sets the real time */ 
+  google.protobuf.Timestamp RealTime = 2; 
+
 }
